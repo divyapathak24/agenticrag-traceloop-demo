@@ -21,7 +21,8 @@ This application is inspired by the tutorial from [LangGraph Hierarchical Agent 
 
 The **supervisor node** is responsible for routing tasks to specific agents. The **research supervisor** handles queries related to research, while the **writing supervisor** handles tasks like blog or document creation.
 
-![supervisor_end_combined_graph](https://github.ibm.com/telemetryobservability/agent-observability/assets/474539/c393dbdd-44fa-4c48-adb3-7b5368c23368)
+![multi-agent-rag](https://github.com/user-attachments/assets/6acfe377-5eb9-4837-b366-10a771a71ad3)
+
 
 ---
 
