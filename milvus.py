@@ -35,7 +35,7 @@ def connect_to_milvus():
 
 def init_milvus_collection():
     """Creates a Milvus collection with the specified schema."""
-    client = MilvusClient("http://localhost:19530")
+    client = MilvusClient(URI)
 
     # Define schema for the collection
     idx = FieldSchema(
@@ -112,7 +112,7 @@ def compute_embeddings(doc_splits, embeddings):
 
 def insert_data_into_milvus(batch):
     """Insert data (ID, vector, document ID, text) into Milvus."""
-    client = MilvusClient("http://localhost:19530")
+    client = MilvusClient(URI)
     client.insert(collection_name=COLLECTION_NAME, data=batch)
     print("Data inserted into Milvus.")
 
@@ -152,7 +152,7 @@ def create_vector_store_and_insert_data():
 
 def create_index():
     """Create an index for the vector field in the collection."""
-    client = MilvusClient("http://localhost:19530")
+    client = MilvusClient(URI)
 
     index_params = client.prepare_index_params()
 
@@ -171,7 +171,7 @@ def create_index():
 def run_search(query):
     """Run a search query against the Milvus collection."""
 
-    client = MilvusClient("http://localhost:19530")
+    client = MilvusClient(URI)
 
     # Ensure the collection is loaded
     client.load_collection(COLLECTION_NAME)
