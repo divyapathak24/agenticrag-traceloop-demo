@@ -31,9 +31,16 @@ tavily_api_key = os.getenv("TAVILY_API_KEY")
 
 #========================== Observability with Instana =====================
 
-from traceloop.sdk import Traceloop
-Traceloop.init(app_name="AgenticRAG", api_endpoint="localhost:4317")
+from agent_analytics.instrumentation.configs import OTLPCollectorConfig
+from agent_analytics.instrumentation import agent_analytics_sdk
 
+agent_analytics_sdk.initialize_logging(
+    tracer_type = agent_analytics_sdk.SUPPORTED_TRACER_TYPES.REMOTE,
+    config = OTLPCollectorConfig(
+            endpoint='http://localhost:4318/v1/traces',
+            app_name='AgenticRAG',
+    )
+)
 #========================== Set working directory to save files =====================
 WORKING_DIRECTORY = Path("files")
 
@@ -476,36 +483,6 @@ def call_paper_writing_team(state: State) -> Command[Literal["supervisor"]]:
 
     return Command(update={"messages": response_messages}, goto="supervisor")
 
-
-# ========================== Using invoke() ===================================
-
-# def call_research_team(state: State) -> Command[Literal["supervisor"]]:
-#     response = research_graph.invoke({"messages": state["messages"][-1]})
-#     return Command(
-#         update={
-#             "messages": [
-#                 HumanMessage(
-#                     content=response["messages"][-1].content, name="research_team"
-#                 )
-#             ]
-#         },
-#         goto="supervisor",
-#     )
-
-
-# def call_paper_writing_team(state: State) -> Command[Literal["supervisor"]]:
-#     response = paper_writing_graph.invoke({"messages": state["messages"][-1]})
-#     return Command(
-#         update={
-#             "messages": [
-#                 HumanMessage(
-#                     content=response["messages"][-1].content, name="writing_team"
-#                 )
-#             ]
-#         },
-#         goto="supervisor",
-#     )
-
 # ========================== Build a supergraph ===================================
 
 super_builder = StateGraph(State)
@@ -516,24 +493,18 @@ super_builder.add_node("writing_team", call_paper_writing_team)
 super_builder.add_edge(START, "supervisor")
 super_graph = super_builder.compile()
 
-# ========================= Save and print graph visualization ===============================
-# graph_image = super_graph.get_graph().draw_mermaid_png()
-# graph_research = research_graph.get_graph().draw_mermaid_png()
-# graph_paper = paper_writing_graph.get_graph().draw_mermaid_png()
-# with open("graph_new.png", "wb") as f:
-#     f.write(graph_image)
-# with open("graph_research_new.png", "wb") as f:
-#     f.write(graph_research)
-# with open("graph_paper_new.png", "wb") as f:
-#     f.write(graph_paper)
-
 # ========================= Query ===============================
+
+import sys
+
+input_query = sys.argv[1]
+print("Received query:", input_query)
 
 def main():
     for s in super_graph.stream(
         {
             "messages": [
-                ("user", "What are top AI agents also write a blog on it and save it in AI-Agents.txt")
+                ("user", input_query)
             ],
         },
         {"recursion_limit": 150},
